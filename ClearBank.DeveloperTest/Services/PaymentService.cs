@@ -6,6 +6,19 @@ namespace ClearBank.DeveloperTest.Services
 {
     public class PaymentService : IPaymentService
     {
+        private readonly BackupAccountDataStore backupAccountDataStore;
+        private readonly AccountDataStore accountDataStore;
+
+        public PaymentService() : this(new BackupAccountDataStore(), new AccountDataStore())
+        {
+
+        }
+        public PaymentService(BackupAccountDataStore backupAccountDataStore, AccountDataStore accountDataStore)
+        {
+            this.backupAccountDataStore = backupAccountDataStore;
+            this.accountDataStore = accountDataStore;
+        }
+
         public MakePaymentResult MakePayment(MakePaymentRequest request)
         {
             var dataStoreType = ConfigurationManager.AppSettings["DataStoreType"];
@@ -14,13 +27,11 @@ namespace ClearBank.DeveloperTest.Services
 
             if (dataStoreType == "Backup")
             {
-                var accountDataStore = new BackupAccountDataStore();
-                account = accountDataStore.GetAccount(request.DebtorAccountNumber);
+                account = this.backupAccountDataStore.GetAccount(request.DebtorAccountNumber);
             }
             else
             {
-                var accountDataStore = new AccountDataStore();
-                account = accountDataStore.GetAccount(request.DebtorAccountNumber);
+                account = this.accountDataStore.GetAccount(request.DebtorAccountNumber);
             }
 
             var result = new MakePaymentResult();
@@ -75,13 +86,11 @@ namespace ClearBank.DeveloperTest.Services
 
                 if (dataStoreType == "Backup")
                 {
-                    var accountDataStore = new BackupAccountDataStore();
-                    accountDataStore.UpdateAccount(account);
+                    this.backupAccountDataStore.UpdateAccount(account);
                 }
                 else
                 {
-                    var accountDataStore = new AccountDataStore();
-                    accountDataStore.UpdateAccount(account);
+                    this.accountDataStore.UpdateAccount(account);
                 }
             }
 
